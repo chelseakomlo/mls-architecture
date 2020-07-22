@@ -203,12 +203,14 @@ A typical group messaging scenario might look like this:
 
 4. Bob and/or Charlie respond to Alice's message. In addtion, they
    might choose to update their key material which provides
-   post-compromise security {{fs-and-pcs}}. As a consequence of that
-   change, the group secrets are updated
+   post-compromise security for message content {{fs-and-pcs}}. As a consequence
+   of group members updating their own key material,
+   change, the group's secrets--- the symmetric encryption keys used to encrypt
+   group messages---are updated.
 
 Clients may wish to do the following:
 
- -  create a group by inviting a set of other clients;
+ -  create a new group by inviting a set of other clients;
 
  -  add one or more clients to an existing group;
 
@@ -263,6 +265,13 @@ have knowledge of the shared group secret established in the group key
 establishment phase of the protocol and have contributed to it.
 Until a Member has contributed to the group secret, other members
 cannot assume she is a member of the group.
+===
+This is a *really* weird way of saying that a member must contribute to the
+group secret. I would re-phrase as
+"Until a Member has contributed to the group secret, other members
+will not consider her as a member of the group, a check which the underlying
+protocol strongly supports."
+===
 
 ## Authentication Service
 
@@ -280,8 +289,17 @@ architecture:
 * A directory server which provides the key for a given identity
   (presumably this connection is secured via some form of transport
   security such as TLS).
+===
+Say that the client must be assured of their connection to the directory
+service as being authentic.
+===
 
 The MLS protocol assumes a signature keypair for authentication of
+===
+"The MLS protocol assumes each user maintains a signature keypair for
+for which they use to provide an authentication value along with the message
+for which they send to other users.
+===
 messages. It is important to note that this signature keypair might be
 the identity keypair directly, or a different signature keypair for
 which the the public key has been for example signed by the identity
@@ -297,10 +315,18 @@ messages after the compromise of a device.
 Ultimately, the only requirement is for the applications to be able to
 check the credential containing the protocol signing key and the
 identity against the Authentication Service at any time.
+===
+Huh. Why would you want to do this at any time? Either link to another section
+where it further specifies this, or give more detail about the cases when this
+would be valuable.
+===
 
 By definition, the Authentication Service is invested with a large
 amount of trust.  A malicious AS can impersonate -- or allow an
 attacker to impersonate -- any user of the system. As a corrolary, by
+===
+Spelling
+===
 impersonating identities authorized to be members of a group, an AS
 can break confidentiality.
 
@@ -310,6 +336,10 @@ identities and keys in a public log such as Key Transparency (KT)
 without any kind of public key logging, but such a system will
 necessarily be somewhat vulnerable to attack by a malicious or
 untrusted AS.
+===
+Huh. I wouldn't say it has to be a log? Doesn't it just have to be an
+out-of-band channel?
+===
 
 ## Delivery Service
 
@@ -320,15 +350,27 @@ Service Provider architecture:
   for clients to use.
   This allows a client to establish a shared key and send encrypted
   messages to other clients even if the other client is offline.
+===
+"if the other clients", since this is a group messaging protocol?
+===
 
 * To route messages between clients and to act as a message
   broadcaster, taking in one message and forwarding it to multiple
   clients (also known as "server side fanout").
+===
+Do clients have any assurances that the server doesn't drop messages
+selectively? In other words, can they verify the transcript that they see is
+the same as for all other clients?
+===
 
 Because the MLS protocol provides a way for Clients to send and receive
 application messages asynchronously, it only provides causal
 ordering of application messages from senders while it has to enforce
 global ordering of group operations to provide Group Agreement.
+===
+Who enforces this? Are they trusted or can clients (eventually) verify that the ordering is
+correct?
+===
 
 Depending on the level of trust given by the group to the Delivery
 Service, the functional and privacy guarantees provided by MLS may
@@ -337,11 +379,23 @@ the same.
 
 Unlike the Authentication Service which is trusted for authentication
 and secrecy, the Delivery Service is completely untrusted regarding
+===
+What does being trusted for secrecy here mean?
+===
 this property. While privacy of group membership might be a problem
+===
+these properties, no?
+===
 in the case of a DS server fanout, the Delivery Service can be
 considered as an active adaptative network attacker from the point of
 view of the security analysis.
+===
+Again, the question about how clients verify their transcripts are the same. If
+the DS is trusted to provide ordering and not drop messages, say that here,
+otherwise, say why it isn't required to be trusted with those responsibilities.
+===
 
+CK start from here
 ### Key Storage
 
 Upon joining the system, each client stores its initial cryptographic
